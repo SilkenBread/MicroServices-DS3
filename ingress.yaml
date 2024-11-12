@@ -10,10 +10,10 @@ spec:
   rules:
   - http:
       paths:
-      - path: /service1(/|$)(.*)
+      - path: /auth(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:
-            name: geocoding
+            name: auth-service
             port:
-              number: 80
+              number: 5000
