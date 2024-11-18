@@ -3,13 +3,27 @@ kind: Ingress
 metadata:
   name: api-gateway
   annotations:
+    # Habilita el uso de regex y la reescritura de paths para redirigir correctamente
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
+
+    # Configuraciones de rate limiting para limitar la carga
+    nginx.ingress.kubernetes.io/limit-connections: "20"          # Máximo de conexiones concurrentes permitidas
+    nginx.ingress.kubernetes.io/limit-rpm: "60"                  # Limita a 60 requests por minuto por IP
+    nginx.ingress.kubernetes.io/limit-burst-multiplier: "1"      # Multiplicador de burst para tráfico intenso
+
+    # Seguridad: Habilita el header para prevenir ataques de clickjacking
+    nginx.ingress.kubernetes.io/x-frame-options: "DENY"
+    # Seguridad: Content Security Policy para restringir el uso de recursos externos
+    nginx.ingress.kubernetes.io/content-security-policy: "default-src 'self';"
+
 spec:
   ingressClassName: nginx
   rules:
-  - http:
+  - host: localhost
+    http:
       paths:
+      # Configuración para el servicio geocoding
       - path: /service1(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
@@ -17,3 +31,11 @@ spec:
             name: geocoding
             port:
               number: 80
+      # Ejemplo de path para un futuro servicio (descomentar para usar)
+      # - path: /service2(/|$)(.*)
+      #   pathType: ImplementationSpecific
+      #   backend:
+      #     service:
+      #       name: otro-servicio
+      #       port:
+      #         number: 80
